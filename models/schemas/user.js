@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const querySettings = require('../settings/querySettings')
-// const parseUser = require('../utils/parseUser')
 const bcrypt = require('bcrypt');
 const saltRounds = 10
 
@@ -32,13 +31,16 @@ const userSchema = new mongoose.Schema({
     timestamps: true,
 })
 
-userSchema.statics.signup = function (user) {
-    bcrypt.genSalt(saltRounds).then(salt => {
-        return bcrypt.hash(user.pw, salt)
-    }).then(hash => {
-        user.pw = hash
-        return (new this(user)).save()
-    }).catch(err => Promise.reject(err))
+userSchema.statics.signUp = function (user) {
+    return new Promise((resolve, reject) => {
+        bcrypt.genSalt(saltRounds)
+            .then(salt => bcrypt.hash(user.pw, salt))
+            .then(hash => {
+                user.pw = hash
+                resolve((new this(user)).save())
+            })
+            .catch(err => reject(err))
+    })
 }
 userSchema.statics.findAll = function (page) {
     return this.find({}).skip((page - 1) * querySettings.limitPerQuery).limit(querySettings.limitPerQuery)
@@ -47,10 +49,11 @@ userSchema.statics.findOneById = function (id) {
     return this.findOne({ id })
 }
 userSchema.statics.updateById = function (user) {
-    return this.findOneAndUpdate({ id: users.id }, user, { new: true })
+    return this.findOneAndUpdate({ id: user.id }, user, { new: true })
 }
 userSchema.statics.deleteById = function (id) {
-    return this.remove({ id })
+    // return this.remove({ id })
+    return this.deleteOne({ id })
 }
 
 module.exports = mongoose.model('User', userSchema)

@@ -25,6 +25,7 @@ app.use(cors(webSettings.corsSettings));
 
 
 app.use(timeStamp)
+app.use('/location', require('./routers/location'))
 app.use('/user', require('./routers/user'))
 // app.use('/location', require('./routers/location'))
 
