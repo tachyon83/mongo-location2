@@ -2,29 +2,14 @@ const router = require('express').Router()
 const User = require('../models/schemas/user')
 const resHandler = require('../utils/resHandler')
 const errHandler = require('../utils/errHandler')
-const passport = require('passport');
-const passportConfig = require('../configs/passportConfig')
-passportConfig()
+// const passport = require('passport');
+const redisClient = require('../configs/redis/redisClient')
+const passportAuthenticate = require('../configs/passport/passportAuthenticate')
 
-router.post('/login', (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-        if (err) return res.status(500).json(errHandler(err))
-        if (user) {
-            // when using custom callback, need to use req.logIn()
-            req.logIn(user, (err) => {
-                if (err) return res.status(500).json(errHandler(err))
-                console.log('[MEMBER]: login successful')
-                console.log(req.session.passport)
-                console.log()
-                res.status(200).json(resHandler(true))
-            })
-        } else {
-            console.log('[MEMBER]: login failed')
-            console.log()
-            res.status(200).json(resHandler(false))
-        }
-    })(req, res, next)
-})
+router.get('/kakao/login', passportAuthenticate('kakao'))
+router.get('/kakao/oauth', passportAuthenticate('kakao'))
+
+router.post('/login', passportAuthenticate('local'))
 
 router.post('/', (req, res) => {
     User.signUp(req.body)
@@ -42,6 +27,20 @@ router.delete('/', (req, res) => {
     User.deleteById(req.body.id)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
+})
+
+router.get('/logout', (req, res) => {
+    try {
+        redisClient.srem(process.env.redisOnlineUsers, req.session.passport.user)
+        req.session.destroy(err => {
+            if (err) res.status(500).json(errHandler(err))
+            console.log('[MEMBER]: successfully logged out')
+            console.log()
+            res.status(200).json(resHandler(null))
+        })
+    } catch (err) {
+        res.status(500).json(errHandler(err))
+    }
 })
 
 module.exports = router

@@ -17,8 +17,12 @@ router.get('/:pageNo/:numOfRows/:mapX/:mapY/:radius', (req, res) => {
         url,
         method: 'GET'
     }, (err, response, body) => {
+        // console.log(response)
+        // console.log(body)
         // console.log('Status', response.statusCode);
         // console.log('Headers', JSON.stringify(response.headers));
+        // console.log(response.headers)
+        // console.log(JSON.parse(response.headers))
         // console.log('Reponse received', body);
 
         if (err) return res.status(500).json(errHandler(err))
@@ -26,6 +30,10 @@ router.get('/:pageNo/:numOfRows/:mapX/:mapY/:radius', (req, res) => {
         // xml2json converts xml into json text, so need to parse the string.
         const converted = JSON.parse(convert.xml2json(body, { compact: true, spaces: 2 }))
         // console.log(converted.response.body.items.item.length)
+        // console.log(Object.keys(converted.response.body.items))
+        // console.log(Object.keys(converted.response.body))
+        // console.log(Object.keys(converted.response.body.items.item))
+        console.log('total:', converted.response.body.totalCount)
         converted.response.body.items.item.map(e => {
             console.log(e.contentId)
             console.log(e.facltNm)

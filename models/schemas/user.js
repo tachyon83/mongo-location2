@@ -49,7 +49,25 @@ userSchema.statics.findOneById = function (id) {
     return this.findOne({ id })
 }
 userSchema.statics.updateById = function (user) {
-    return this.findOneAndUpdate({ id: user.id }, user, { new: true })
+    // return new Promise((resolve, reject) => {
+    //     bcrypt.genSalt(saltRounds)
+    //         .then(salt => bcrypt.hash(user.pw, salt))
+    //         .then(hash => {
+    //             user.pw = hash
+    //             resolve(this.findOneAndUpdate({ id: user.id }, user, {
+    //                 useFindAndModify: false,
+    //                 new: true
+    //             }))
+    //         })
+    //         .catch(err => reject(err))
+    // })
+    return this.findOneAndUpdate({ id: user.id }, {
+        address: user.address,
+        name: user.name,
+    }, {
+        useFindAndModify: false,
+        new: true
+    })
 }
 userSchema.statics.deleteById = function (id) {
     // return this.remove({ id })

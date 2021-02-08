@@ -1,12 +1,15 @@
+require('dotenv').config()
 const http = require('http');
 const express = require('express');
 // const session = require('express-session');
 const passport = require('passport');
+const passportConfig = require('./configs/passport/passportConfig')
+passportConfig(passport)
 const morgan = require('morgan')
 const timeStamp = require('./utils/timeStamp')
 const cors = require('cors');
 const webSettings = require('./configs/webSettings')
-require('dotenv').config()
+const auth = require('./utils/auth')
 
 // need to see the connection message!
 const mongooseConnect = require('./models/mongooseConnect')
@@ -25,7 +28,7 @@ app.use(cors(webSettings.corsSettings));
 
 
 app.use(timeStamp)
-app.use('/location', require('./routers/location'))
+app.use('/location', auth, require('./routers/location'))
 app.use('/user', require('./routers/user'))
 // app.use('/location', require('./routers/location'))
 
@@ -41,7 +44,7 @@ app.use(function (err, req, res, next) {
     console.log('check cors, path, method...etc')
     console.log(err)
     console.log()
-    res.status(err.status || 500).json({ packet: null })
+    res.status(err.status || 500).json({ packet: '404 or 500...' })
 });
 
 const server = http.createServer(app);
