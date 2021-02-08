@@ -20,4 +20,9 @@ redisClient.on('error', function (err) {
     console.log()
 })
 
+redisClient.get(process.env.redisNextContentIdKey, (err, id) => {
+    if (err) console.log(err)
+    else if (!id) redisClient.set(process.env.redisNextContentIdKey, process.env.redisNextContentId)
+})
+
 module.exports = redisClient

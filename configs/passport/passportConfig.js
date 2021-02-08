@@ -11,7 +11,7 @@ module.exports = passport => {
 
     passport.serializeUser((user, done) => {
         // when done, req.session.passport.user에 저장!
-        if (user.provider === 'kakao') user.id = process.env.kakaoUser + user.id
+        if (user.provider && user.provider === 'kakao') user.id = process.env.kakaoUser + user.id
         redisClient.sadd(process.env.redisOnlineUsers, user.id)
         console.log('[PASSPORT]: Now Being Serialized')
         console.log()

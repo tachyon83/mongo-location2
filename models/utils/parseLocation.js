@@ -1,3 +1,5 @@
+const redisClient = require('../../configs/redis/redisClient')
+
 module.exports = obj => {
     return {
         name: obj.name,
