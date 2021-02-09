@@ -29,27 +29,57 @@ router.get('/:pageNo/:numOfRows/:mapX/:mapY/:radius', (req, res) => {
         const converted = JSON.parse(convert.xml2json(body, { compact: true, spaces: 2 }))
 
         // openApi에서 나온 정보가 우선한다. 이후에 local db정보를 가져온다.
-        let totalCount = converted.response.body.totalCount
+        let totalCount = parseInt(converted.response.body.totalCount._text)
+        let totalFromOpenApi = totalCount
+        // console.log('total from api', totalCount)
         try {
             totalCount += await Location.findCircleCount(req.params.mapX, req.params.mapY, req.params.radius)
+            // console.log('after adding db', totalCount)
         } catch (err) {
             res.status(500).json(errHandler(err))
         }
 
-        converted.response.body.items.item.map(e => parseLocationDto(e))
-
-        let l = converted.response.body.items.item.length
-        let numOfRows = parseInt(req.params.numOfRows)
-        if (l < numOfRows) {
-            let diff = numOfRows - l
-            await Location.findCircle(req.params.mapX, req.params.mapY, req.params.radius, diff)
+        // 배열 비어있을 때 []로 오는지 확인
+        if (converted.response.body.items.item) {
+            if (converted.response.body.items.item.length) {
+                converted.response.body.items.item = converted.response.body.items.item.map(e => parseLocationDto(e))
+            } else {
+                converted.response.body.items.item = [parseLocationDto(converted.response.body.items.item)]
+            }
+        } else {
+            converted.response.body.items.item = []
         }
-        res.status(200).json(resHandler(converted.response.body.items.item.length))
-    })
 
-    // Location.findAll()
-    //     .then(list => res.json(resHandler(list)))
-    //     .catch(err => res.json(errHandler(err)))
+        // console.log(converted.response.body.items.item)
+        // console.log(converted.response.body.items.item.length)
+
+        let pageNo = parseInt(req.params.pageNo)
+        let numOfRows = parseInt(req.params.numOfRows)
+
+        if (pageNo * numOfRows > totalFromOpenApi) {
+            let diff = pageNo * numOfRows - totalFromOpenApi
+            let skip = 0
+            if (diff > numOfRows) {
+                skip = (pageNo - 1) * numOfRows - totalFromOpenApi
+                diff -= skip
+            }
+
+            try {
+                let listFromLocalDb = await Location.findCircle(req.params.mapX, req.params.mapY, req.params.radius, skip, diff)
+                converted.response.body.items.item = converted.response.body.items.item.concat(listFromLocalDb)
+            } catch (err) {
+                res.status(500).json(errHandler(err))
+            }
+            res.status(200).json(resHandler({
+                totalCount,
+                items: converted.response.body.items.item,
+            }))
+
+        } else res.status(200).json(resHandler({
+            totalCount,
+            items: converted.response.body.items.item,
+        }))
+    })
 })
 
 router.get('/:name', (req, res) => {
@@ -58,7 +88,7 @@ router.get('/:name', (req, res) => {
         .catch(err => res.json(errHandler(err)))
 })
 
-router.post('/', (req, res) => {
+router.post('/coordinates', (req, res) => {
     Location.add(req.body)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))

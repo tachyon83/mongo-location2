@@ -151,10 +151,10 @@ locationSchema.statics.findCircleCount = function (lng, lat, radius) {
         unique: true,
         spherical: true
         // maxDistance: parseFloat(maxDistance),
-    }).count()
+    }).countDocuments()
 }
 
-locationSchema.statics.findCircle = function (lng, lat, radius, cnt) {
+locationSchema.statics.findCircle = function (lng, lat, radius, skip, cnt) {
     return this.find().where('position').within({
         center: [parseFloat(lng), parseFloat(lat)],
         // center: [lng, lat],
@@ -162,7 +162,7 @@ locationSchema.statics.findCircle = function (lng, lat, radius, cnt) {
         unique: true,
         spherical: true
         // maxDistance: parseFloat(maxDistance),
-    }).limit(cnt)
+    }).skip(skip).limit(cnt)
 }
 
 module.exports = mongoose.model('Location', locationSchema)
