@@ -31,9 +31,12 @@ router.get('/:pageNo/:numOfRows/:mapX/:mapY/:radius', (req, res) => {
         // openApi에서 나온 정보가 우선한다. 이후에 local db정보를 가져온다.
         let totalCount = parseInt(converted.response.body.totalCount._text)
         let totalFromOpenApi = totalCount
+        let totalFromLocalDb = 0
+
         // console.log('total from api', totalCount)
         try {
-            totalCount += await Location.findCircleCount(req.params.mapX, req.params.mapY, req.params.radius)
+            totalFromLocalDb = await Location.findCircleCount(req.params.mapX, req.params.mapY, req.params.radius)
+            totalCount += totalFromLocalDb
             // console.log('after adding db', totalCount)
         } catch (err) {
             res.status(500).json(errHandler(err))
@@ -59,6 +62,12 @@ router.get('/:pageNo/:numOfRows/:mapX/:mapY/:radius', (req, res) => {
         if (pageNo * numOfRows > totalFromOpenApi) {
             let diff = pageNo * numOfRows - totalFromOpenApi
             let skip = 0
+            if (diff > totalFromLocalDb) {
+                return res.status(200).json(resHandler({
+                    totalCount,
+                    items: converted.response.body.items.item,
+                }))
+            }
             if (diff > numOfRows) {
                 skip = (pageNo - 1) * numOfRows - totalFromOpenApi
                 diff -= skip
