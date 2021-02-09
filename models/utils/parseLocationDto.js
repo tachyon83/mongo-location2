@@ -1,0 +1,26 @@
+module.exports = obj => {
+    return {
+        contentId: obj.contentId,
+        facltNm: obj.facltNm,
+        lineIntro: obj.lineIntro,
+        intro: obj.intro,
+        hvofBgnde: obj.hvofBgnde,
+        hvofEnddle: obj.hvofEnddle,
+        featureNm: obj.featureNm,
+        induty: obj.induty,
+        lctCl: obj.lctCl,
+        doNm: obj.doNm,
+        sigunguNm: obj.sigunguNm,
+        addr1: obj.addr1,
+        addr2: obj.addr2,
+        direction: obj.direction,
+        tel: obj.tel,
+        homepage: obj.homepage,
+        exprnProgrm: obj.exprnProgrm,
+        eqpmnLendCl: obj.eqpmnLendCl,
+        animalCmgCl: obj.animalCmgCl,
+        tourEraCl: obj.tourEraCl,
+        firstImageUrl: obj.firstImageUrl,
+        position: [obj.mapX, obj.mapY],
+    }
+}

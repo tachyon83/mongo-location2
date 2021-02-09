@@ -11,73 +11,73 @@ const locationSchema = new mongoose.Schema({
         required: true,
         index: true,
     },
-    // facltNm: {
-    //     type: String,
-    //     index: 'hashed',
-    //     // default: '',
-    //     required: true,
-    // },
-    // lineIntro: {
-    //     type: String,
-    //     // index: 'hashed',
-    //     // default: '',
-    //     required: true,
-    // },
-    // intro: {
-    //     type: String,
-    //     required: true,
-    // },
-    // hvofBgnde: {
-    //     type: String,
-    // },
-    // hvofEnddle: {
-    //     type: String,
-    // },
-    // featureNm: {
-    //     type: String,
-    // },
-    // induty: {
-    //     type: String,
-    // },
-    // lctCl: {
-    //     type: String,
-    // },
-    // doNm: {
-    //     type: String,
-    // },
-    // sigunguNm: {
-    //     type: String,
-    // },
-    // addr1: {
-    //     type: String,
-    // },
-    // addr2: {
-    //     type: String,
-    // },
-    // direction: {
-    //     type: String,
-    // },
-    // tel: {
-    //     type: String,
-    // },
-    // homepage: {
-    //     type: String,
-    // },
-    // exprnProgrm: {
-    //     type: String,
-    // },
-    // eqpmnLendCl: {
-    //     type: String,
-    // },
-    // animalCmgCl: {
-    //     type: String,
-    // },
-    // tourEraCl: {
-    //     type: String,
-    // },
-    // firstImageUrl: {
-    //     type: String,
-    // },
+    facltNm: {
+        type: String,
+        index: 'hashed',
+        // default: '',
+        required: true,
+    },
+    lineIntro: {
+        type: String,
+        // index: 'hashed',
+        // default: '',
+        required: true,
+    },
+    intro: {
+        type: String,
+        required: true,
+    },
+    hvofBgnde: {
+        type: String,
+    },
+    hvofEnddle: {
+        type: String,
+    },
+    featureNm: {
+        type: String,
+    },
+    induty: {
+        type: String,
+    },
+    lctCl: {
+        type: String,
+    },
+    doNm: {
+        type: String,
+    },
+    sigunguNm: {
+        type: String,
+    },
+    addr1: {
+        type: String,
+    },
+    addr2: {
+        type: String,
+    },
+    direction: {
+        type: String,
+    },
+    tel: {
+        type: String,
+    },
+    homepage: {
+        type: String,
+    },
+    exprnProgrm: {
+        type: String,
+    },
+    eqpmnLendCl: {
+        type: String,
+    },
+    animalCmgCl: {
+        type: String,
+    },
+    tourEraCl: {
+        type: String,
+    },
+    firstImageUrl: {
+        type: String,
+    },
     position: {
         type: {
             type: String,
@@ -143,15 +143,26 @@ locationSchema.statics.findNearest = function (lng, lat, maxDistance) {
     }).limit(1)
 }
 
-locationSchema.statics.findCircle = function (lng, lat, radius) {
+locationSchema.statics.findCircleCount = function (lng, lat, radius) {
     return this.find().where('position').within({
-        // center: [parseFloat(lng), parseFloat(lat)],
-        center: [lng, lat],
-        radius: parseFloat(radius / querySettings.radiusConversion),
+        center: [parseFloat(lng), parseFloat(lat)],
+        // center: [lng, lat],
+        radius: parseFloat(radius) / querySettings.radiusConversion,
         unique: true,
         spherical: true
         // maxDistance: parseFloat(maxDistance),
-    }).limit(querySettings.limitPerQuery)
+    }).count()
+}
+
+locationSchema.statics.findCircle = function (lng, lat, radius, cnt) {
+    return this.find().where('position').within({
+        center: [parseFloat(lng), parseFloat(lat)],
+        // center: [lng, lat],
+        radius: parseFloat(radius) / querySettings.radiusConversion,
+        unique: true,
+        spherical: true
+        // maxDistance: parseFloat(maxDistance),
+    }).limit(cnt)
 }
 
 module.exports = mongoose.model('Location', locationSchema)
