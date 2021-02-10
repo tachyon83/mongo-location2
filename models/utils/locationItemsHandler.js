@@ -10,11 +10,13 @@ module.exports = (req, body) => {
 
         // openApi에서 나온 정보가 우선한다. 이후에 local db정보를 가져온다.
         let totalCount = parseInt(converted.response.body.totalCount._text)
+        console.log('total from openApi', totalCount)
         let totalFromOpenApi = totalCount
         let totalFromLocalDb = 0
 
         try {
             totalFromLocalDb = await Location.findCircleCount(req.params.mapX, req.params.mapY, req.params.radius)
+            console.log('totalFromLocalDb', totalFromLocalDb)
             totalCount += totalFromLocalDb
         } catch (err) {
             return reject(err)
@@ -31,17 +33,21 @@ module.exports = (req, body) => {
         } else {
             converted.response.body.items.item = []
         }
+        // console.log(converted.response.body.items.item)
 
         let pageNo = parseInt(req.params.pageNo)
         let numOfRows = parseInt(req.params.numOfRows)
 
         if (pageNo * numOfRows > totalFromOpenApi) {
+            let maxPage = parseInt(totalCount / numOfRows)
+            maxPage = (totalCount % numOfRows) ? maxPage + 1 : maxPage
             let diff = pageNo * numOfRows - totalFromOpenApi
             let skip = 0
-            if (diff > totalFromLocalDb) {
+            if (pageNo > maxPage) {
                 return resolve({
                     totalCount,
-                    items: converted.response.body.items.item,
+                    // items: converted.response.body.items.item,
+                    items: [],
                 })
             }
             if (diff > numOfRows) {
