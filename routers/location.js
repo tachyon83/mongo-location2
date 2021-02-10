@@ -24,6 +24,9 @@ router.get('/:pageNo/:numOfRows/:mapX/:mapY/:radius', (req, res) => {
         if (err) return res.status(500).json(errHandler(err))
         if (response.statusCode !== 200) return res.status(500).json(resHandler(null))
 
+        console.log('[location Router]: Now handling location items...')
+        console.log()
+
         locationItemsHandler(req, body)
             .then(packet => res.status(200).json(resHandler(packet)))
             .catch(err => res.status(500).json(errHandler(err)))

@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 const querySettings = require('../settings/querySettings')
-const bcrypt = require('bcrypt');
-const saltRounds = 10
+const encode = require('../../utils/encode')
 
 const userSchema = new mongoose.Schema({
     id: {
@@ -33,8 +32,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.statics.signUp = function (user) {
     return new Promise((resolve, reject) => {
-        bcrypt.genSalt(saltRounds)
-            .then(salt => bcrypt.hash(user.pw, salt))
+        encode(user.pw)
             .then(hash => {
                 user.pw = hash
                 resolve((new this(user)).save())

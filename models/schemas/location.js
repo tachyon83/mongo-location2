@@ -1,8 +1,6 @@
 const mongoose = require('mongoose')
 const querySettings = require('../settings/querySettings')
 const nextContentIdIncrement = require('../utils/nextContentIdIncrement')
-// const parsePayload = require('../utils/parseLocation')
-// const redisClient = require('../../configs/redis/redisClient')
 
 const locationSchema = new mongoose.Schema({
     contentId: {
@@ -108,7 +106,7 @@ locationSchema.statics.add = function (payload) {
                 flag = true
                 return resolve(result)
             } catch (err) {
-                console.log('duplicate key')
+                console.log('[Schema]: Duplicate Key...need to increment the contentId.')
                 // console.log(err)
             }
         }

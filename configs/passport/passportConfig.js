@@ -28,6 +28,8 @@ module.exports = passport => {
 
         redisClient.sismember(process.env.redisOnlineUsers, id, (err, res) => {
             if (err) return done(err, null)
+            console.log('[PASSPORT]: Now Being Deserialized')
+            console.log()
             return done(null, res ? id : null)
         })
         // User.findOneById(id)
