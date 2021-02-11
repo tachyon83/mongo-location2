@@ -9,17 +9,23 @@ const locationItemsHandler = require('../models/utils/locationItemsHandler')
 router.get('/:pageNo/:numOfRows/:mapX/:mapY/:radius', (req, res) => {
     const url = `${process.env.openApiUrl}?ServiceKey=${process.env.ServiceKey}&pageNo=${req.params.pageNo}&numOfRows=${req.params.numOfRows}&MobileOS=${process.env.MobileOS}&MobileApp=${process.env.MobileApp}&mapX=${req.params.mapX}&mapY=${req.params.mapY}&radius=${req.params.radius}`
 
+    // axios
+
     // fetch(url)
     //     .then(response => console.log(response))
     //     .catch(err => res.json(errHandler(err)))
+
+    console.log('api call received')
+    // console.log(url)
 
     request({
         url,
         method: 'GET'
     }, (err, response, body) => {
 
-        // console.log('Status', response.statusCode);
+        console.log('Status', response.statusCode);
         // console.log('Headers', JSON.stringify(response.headers));
+        // console.log('body', body)
 
         if (err) return res.status(500).json(errHandler(err))
         if (response.statusCode !== 200) return res.status(500).json(resHandler(null))
@@ -31,6 +37,10 @@ router.get('/:pageNo/:numOfRows/:mapX/:mapY/:radius', (req, res) => {
             .then(packet => res.status(200).json(resHandler(packet)))
             .catch(err => res.status(500).json(errHandler(err)))
     })
+})
+
+router.get('/ping', (req, res) => {
+    res.status(200).json(resHandler('pong'))
 })
 
 router.get('/:name', (req, res) => {

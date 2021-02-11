@@ -8,6 +8,12 @@ module.exports = (req, body) => {
         // xml2json converts xml into json text, so need to parse the string.
         const converted = JSON.parse(convert.xml2json(body, { compact: true, spaces: 2 }))
 
+
+        console.log('keys', Object.keys(converted))
+        console.log('keys', Object.keys(converted.response))
+        console.log('keys', Object.keys(converted.response.header))
+        console.log('keys', converted.response.header.resultMsg._text)
+
         // openApi에서 나온 정보가 우선한다. 이후에 local db정보를 가져온다.
         let totalCount = parseInt(converted.response.body.totalCount._text)
         console.log('total from openApi', totalCount)
@@ -33,12 +39,12 @@ module.exports = (req, body) => {
         } else {
             converted.response.body.items.item = []
         }
-        // console.log(converted.response.body.items.item)
+        console.log(converted.response.body.items.item)
 
         let pageNo = parseInt(req.params.pageNo)
         let numOfRows = parseInt(req.params.numOfRows)
 
-        if (pageNo * numOfRows > totalFromOpenApi) {
+        if (pageNo * numOfRows > totalFromOpenApi && totalFromLocalDb) {
             let maxPage = parseInt(totalCount / numOfRows)
             maxPage = (totalCount % numOfRows) ? maxPage + 1 : maxPage
             let diff = pageNo * numOfRows - totalFromOpenApi
