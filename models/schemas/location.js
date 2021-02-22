@@ -141,6 +141,23 @@ locationSchema.statics.findNearest = function (lng, lat, maxDistance) {
     }).limit(1)
 }
 
+locationSchema.statics.findByKeywordCount = function (keyword) {
+    return this.find({
+        facltNm: {
+            '$regex': keyword,
+            '$options': 'i'
+        }
+    }).countDocuments()
+}
+locationSchema.statics.findByKeyword = function (keyword, skip, cnt) {
+    return this.find({
+        facltNm: {
+            '$regex': keyword,
+            '$options': 'i'
+        }
+    }).skip(skip).limit(cnt)
+}
+
 locationSchema.statics.findCircleCount = function (lng, lat, radius) {
     return this.find().where('position').within({
         center: [parseFloat(lng), parseFloat(lat)],

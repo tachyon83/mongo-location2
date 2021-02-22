@@ -8,11 +8,11 @@ module.exports = (req, body) => {
         // xml2json converts xml into json text, so need to parse the string.
         const converted = JSON.parse(convert.xml2json(body, { compact: true, spaces: 2 }))
 
-
-        console.log('keys', Object.keys(converted))
-        console.log('keys', Object.keys(converted.response))
-        console.log('keys', Object.keys(converted.response.header))
-        console.log('keys', converted.response.header.resultMsg._text)
+        // console.log(converted)
+        // console.log('keys', Object.keys(converted))
+        // console.log('keys', Object.keys(converted.response))
+        // console.log('keys', Object.keys(converted.response.header))
+        // console.log('keys', converted.response.header.resultMsg._text)
 
         // openApi에서 나온 정보가 우선한다. 이후에 local db정보를 가져온다.
         let totalCount = parseInt(converted.response.body.totalCount._text)
@@ -21,7 +21,8 @@ module.exports = (req, body) => {
         let totalFromLocalDb = 0
 
         try {
-            totalFromLocalDb = await Location.findCircleCount(req.params.mapX, req.params.mapY, req.params.radius)
+            if (!req.params.keyword) totalFromLocalDb = await Location.findCircleCount(req.params.mapX, req.params.mapY, req.params.radius)
+            else totalFromLocalDb = await Location.findByKeywordCount(req.params.keyword)
             console.log('totalFromLocalDb', totalFromLocalDb)
             totalCount += totalFromLocalDb
         } catch (err) {
@@ -62,7 +63,7 @@ module.exports = (req, body) => {
             }
 
             try {
-                let listFromLocalDb = await Location.findCircle(req.params.mapX, req.params.mapY, req.params.radius, skip, diff)
+                let listFromLocalDb = await Location.findByKeyword(req.params.keyword, skip, diff)
                 converted.response.body.items.item = converted.response.body.items.item.concat(listFromLocalDb)
             } catch (err) {
                 return reject(err)

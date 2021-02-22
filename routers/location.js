@@ -7,23 +7,26 @@ const request = require('request')
 const locationItemsHandler = require('../models/utils/locationItemsHandler')
 
 router.get('/:pageNo/:numOfRows/:mapX/:mapY/:radius', (req, res) => {
-    const url = `${process.env.openApiUrl}?ServiceKey=${process.env.ServiceKey}&pageNo=${req.params.pageNo}&numOfRows=${req.params.numOfRows}&MobileOS=${process.env.MobileOS}&MobileApp=${process.env.MobileApp}&mapX=${req.params.mapX}&mapY=${req.params.mapY}&radius=${req.params.radius}`
-
-    // axios
+    const url = process.env.openApiUrl_locationBasedSearch + '?'
+        + encodeURIComponent('ServiceKey') + '=' + process.env.ServiceKey
+        + '&' + encodeURIComponent('pageNo') + '=' + encodeURIComponent(req.params.pageNo)
+        + '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent(req.params.numOfRows)
+        + '&' + encodeURIComponent('MobileOS') + '=' + encodeURIComponent(process.env.MobileOS)
+        + '&' + encodeURIComponent('MobileApp') + '=' + encodeURIComponent(process.env.MobileApp)
+        + '&' + encodeURIComponent('mapX') + '=' + encodeURIComponent(req.params.mapX)
+        + '&' + encodeURIComponent('mapY') + '=' + encodeURIComponent(req.params.mapY)
+        + '&' + encodeURIComponent('radius') + '=' + encodeURIComponent(req.params.radius)
 
     // fetch(url)
     //     .then(response => console.log(response))
     //     .catch(err => res.json(errHandler(err)))
-
-    console.log('api call received')
-    // console.log(url)
 
     request({
         url,
         method: 'GET'
     }, (err, response, body) => {
 
-        console.log('Status', response.statusCode);
+        console.log('Open Api Response Status:', response.statusCode);
         // console.log('Headers', JSON.stringify(response.headers));
         // console.log('body', body)
 
@@ -38,6 +41,41 @@ router.get('/:pageNo/:numOfRows/:mapX/:mapY/:radius', (req, res) => {
             .catch(err => res.status(500).json(errHandler(err)))
     })
 })
+
+router.get('/keyword/:pageNo/:numOfRows/:keyword', (req, res) => {
+    const url = process.env.openApiUrl_keywordBasedSearch + '?'
+        + encodeURIComponent('ServiceKey') + '=' + process.env.ServiceKey
+        + '&' + encodeURIComponent('pageNo') + '=' + encodeURIComponent(req.params.pageNo)
+        + '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent(req.params.numOfRows)
+        + '&' + encodeURIComponent('MobileOS') + '=' + encodeURIComponent(process.env.MobileOS)
+        + '&' + encodeURIComponent('MobileApp') + '=' + encodeURIComponent(process.env.MobileApp)
+        + '&' + encodeURIComponent('keyword') + '=' + encodeURIComponent(req.params.keyword)
+
+    // fetch(url)
+    //     .then(response => console.log(response))
+    //     .catch(err => res.json(errHandler(err)))
+
+    request({
+        url,
+        method: 'GET'
+    }, (err, response, body) => {
+
+        console.log('Status', response.statusCode);
+        // console.log('Headers', JSON.stringify(response.headers));
+        // console.log('body', body)
+
+        if (err) return res.status(500).json(errHandler(err))
+        if (response.statusCode !== 200) return res.status(500).json(resHandler(null))
+
+        console.log(`[location Router]: Now handling location items found by keyword: ${req.params.keyword}...`)
+        console.log()
+
+        locationItemsHandler(req, body)
+            .then(packet => res.status(200).json(resHandler(packet)))
+            .catch(err => res.status(500).json(errHandler(err)))
+    })
+})
+
 
 router.get('/ping', (req, res) => {
     res.status(200).json(resHandler('pong'))
