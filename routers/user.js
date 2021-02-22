@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const User = require('../models/schemas/user')
+const auth = require('../utils/auth')
 const resHandler = require('../utils/resHandler')
 const errHandler = require('../utils/errHandler')
 // const passport = require('passport');
@@ -17,19 +18,20 @@ router.post('/', (req, res) => {
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.put('/', (req, res) => {
+router.put('/', auth, (req, res) => {
+    if (!req.isAuthenticated()) return res.status(500).json(errHandler(null))
     User.updateById(req.body)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.delete('/', (req, res) => {
+router.delete('/', auth, (req, res) => {
     User.deleteById(req.body.id)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.get('/logout', (req, res) => {
+router.get('/logout', auth, (req, res) => {
     try {
         redisClient.srem(process.env.redisOnlineUsers, req.session.passport.user)
         req.session.destroy(err => {

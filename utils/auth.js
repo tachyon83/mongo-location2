@@ -1,5 +1,5 @@
 const resHandler = require('./resHandler')
-const errHandler = require('./errHandler')
+// const errHandler = require('./errHandler')
 
 module.exports = (req, res, next) => {
     console.log('[AUTH]: session ID =', req.session.id)

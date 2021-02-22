@@ -26,6 +26,8 @@ app.use(passport.session());
 // cors called after session and passport
 app.use(cors(webSettings.corsSettings));
 
+// 401 for unauthorized
+// 403 for forbidden
 
 app.use(timeStamp)
 app.use('/location', auth, require('./routers/location'))

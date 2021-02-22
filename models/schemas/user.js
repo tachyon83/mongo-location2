@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         // index: 'hashed',
         default: '',
-        unique: true,
         required: true,
     },
     address: {
@@ -26,6 +25,10 @@ const userSchema = new mongoose.Schema({
         default: '',
         unique: true,
     },
+    provider: {
+        type: String,
+        default: '',
+    }
 }, {
     timestamps: true,
 })

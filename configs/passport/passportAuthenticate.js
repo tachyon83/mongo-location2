@@ -7,6 +7,7 @@ module.exports = strategy => {
         passport.authenticate(strategy, (err, user, info) => {
             if (err) return res.status(500).json(errHandler(err))
             if (user) {
+                // strategy==='kakao' =>User.check then save
                 // when using custom callback, need to use req.logIn()
                 req.logIn(user, (err) => {
                     if (err) return res.status(500).json(errHandler(err))
@@ -18,7 +19,7 @@ module.exports = strategy => {
             } else {
                 console.log('[MEMBER]: login failed')
                 console.log()
-                res.status(200).json(resHandler(false))
+                res.status(401).json(resHandler(false))
             }
         })(req, res, next)
     }
