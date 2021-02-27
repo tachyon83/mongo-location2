@@ -30,9 +30,10 @@ app.use(cors(webSettings.corsSettings));
 // 403 for forbidden
 
 app.use(timeStamp)
-app.use('/location', auth, require('./routers/location'))
+app.use('/location', require('./routers/location'))
 app.use('/user', require('./routers/user'))
-// app.use('/location', require('./routers/location'))
+app.use('/review', require('./routers/review'))
+app.use('/word', require('./routers/word'))
 
 // 404
 app.use(function (req, res, next) {

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const querySettings = require('../settings/querySettings')
-const nextContentIdIncrement = require('../utils/nextContentIdIncrement')
+const nextIdIncrement = require('../utils/nextIdIncrement')
 
 const locationSchema = new mongoose.Schema({
     contentId: {
@@ -97,7 +97,7 @@ locationSchema.statics.add = function (payload) {
         let flag = false
         while (!flag) {
             try {
-                payload.contentId = await nextContentIdIncrement()
+                payload.contentId = await nextIdIncrement('content')
             } catch (err) {
                 return reject(err)
             }
