@@ -102,11 +102,9 @@ reviewSchema.statics.findStarAvg = function (contentId) {
         }
     ])
 }
-// need strlen
 reviewSchema.statics.findTheBestByStar = function (contentId) {
     return this.find({ contentId }).sort({ star: -1 }).limit(1)
 }
-// need strlen
 reviewSchema.statics.findTheWorstByStar = function (contentId) {
     return this.find({ contentId }).sort({ star: 1 }).limit(1)
 }
