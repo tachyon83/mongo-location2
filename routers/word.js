@@ -5,7 +5,7 @@ const resHandler = require('../utils/resHandler')
 const errHandler = require('../utils/errHandler')
 
 router.get('/keywords/:num', (req, res) => {
-    Word.findMost(req.params.num)
+    Word.findMost(parseInt(req.params.num))
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })

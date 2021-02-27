@@ -54,11 +54,11 @@ reviewSchema.statics.add = function (payload) {
     })
 }
 
-reviewSchema.statics.findAllByPlace = function (contentId, skip) {
-    return this.find({ contentId }).skip(skip).limit(querySettings.limitPerQuery)
+reviewSchema.statics.findAllByPlace = function (contentId, skip, cnt) {
+    return this.find({ contentId }).skip(skip).limit(cnt)
 }
-reviewSchema.statics.findAllByReviewer = function (reviewerId, skip) {
-    return this.find({ reviewerId }).skip(skip).limit(querySettings.limitPerQuery)
+reviewSchema.statics.findAllByReviewer = function (reviewerId, skip, cnt) {
+    return this.find({ reviewerId }).skip(skip).limit(cnt)
 }
 reviewSchema.statics.findOneById = function (reviewId) {
     return this.findOne({ reviewId })
@@ -79,14 +79,14 @@ reviewSchema.statics.deleteById = function (reviewId) {
     return this.remove({ reviewId })
 }
 
-reviewSchema.statics.findByStarGte = function (star, skip) {
-    return this.find({ star: { $gte: star } }).skip(skip).limit(querySettings.limitPerQuery)
+reviewSchema.statics.findByStarGte = function (star, skip, cnt) {
+    return this.find({ star: { $gte: star } }).skip(skip).limit(cnt)
 }
-reviewSchema.statics.findByStarGteAndPlace = function (star, contentId, skip) {
-    return this.find({ contentId, star: { $gte: star } }).skip(skip).limit(querySettings.limitPerQuery)
+reviewSchema.statics.findByStarGteAndPlace = function (star, contentId, skip, cnt) {
+    return this.find({ contentId, star: { $gte: star } }).skip(skip).limit(cnt)
 }
-reviewSchema.statics.findByStarLteAndPlace = function (star, contentId, skip) {
-    return this.find({ contentId, star: { $lte: star } }).skip(skip).limit(querySettings.limitPerQuery)
+reviewSchema.statics.findByStarLteAndPlace = function (star, contentId, skip, cnt) {
+    return this.find({ contentId, star: { $lte: star } }).skip(skip).limit(cnt)
 }
 reviewSchema.statics.countReviews = function (contentId) {
     return this.find({ contentId }).countDocuments()
@@ -94,14 +94,10 @@ reviewSchema.statics.countReviews = function (contentId) {
 reviewSchema.statics.findStarAvg = function (contentId) {
     return this.aggregate([
         { $match: { contentId, } },
-        // { $group: { average: { $avg: 'star' }, } }
         {
-            $redact: {
-                $cond: [
-                    { $avg: 'star' },
-                    "$$KEEP",
-                    "$$PRUNE"
-                ]
+            $group: {
+                _id: null,
+                average: { $avg: '$star' },
             }
         }
     ])

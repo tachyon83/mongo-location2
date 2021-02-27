@@ -4,6 +4,7 @@ const Word = require('../models/schemas/word')
 const auth = require('../utils/auth')
 const resHandler = require('../utils/resHandler')
 const errHandler = require('../utils/errHandler')
+const skipCntFinder = require('../utils/skipCntFinder')
 
 router.post('/', auth, async (req, res) => {
     let review = req.body.review.split(' ')
@@ -40,32 +41,37 @@ router.delete('/', (req, res) => {
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.get('/all/place/:contentId/:skip', (req, res) => {
-    Review.findAllByPlace(req.params.contentId, parseInt(req.params.skip))
+router.get('/all/place/:contentId/:pageNo/:numOfRows', (req, res) => {
+    let numsObj = skipCntFinder(req.params.pageNo, req.params.numOfRows)
+    Review.findAllByPlace(req.params.contentId, numsObj.skip, numsObj.cnt)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.get('/all/reviewer/:reviewerId/:skip', (req, res) => {
-    Review.findAllByReviewer(req.params.reviewerId, parseInt(req.params.skip))
+router.get('/all/reviewer/:reviewerId/:pageNo/:numOfRows', (req, res) => {
+    let numsObj = skipCntFinder(req.params.pageNo, req.params.numOfRows)
+    Review.findAllByReviewer(req.params.reviewerId, numsObj.skip, numsObj.cnt)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.get('/star/gte/:star/:skip', (req, res) => {
-    Review.findByStarGte(req.params.star, parseInt(req.params.skip))
+router.get('/star/gte/:star/:pageNo/:numOfRows', (req, res) => {
+    let numsObj = skipCntFinder(req.params.pageNo, req.params.numOfRows)
+    Review.findByStarGte(req.params.star, numsObj.skip, numsObj.cnt)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.get('/star/gte/place/:star/:contentId/:skip', (req, res) => {
-    Review.findByStarGteAndPlace(req.params.star, req.params.contentId, parseInt(req.params.skip))
+router.get('/star/gte/place/:star/:contentId/:pageNo/:numOfRows', (req, res) => {
+    let numsObj = skipCntFinder(req.params.pageNo, req.params.numOfRows)
+    Review.findByStarGteAndPlace(req.params.star, req.params.contentId, numsObj.skip, numsObj.cnt)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.get('/star/lte/place/:star/:contentId/:skip', (req, res) => {
-    Review.findByStarLteAndPlace(req.params.star, req.params.contentId, parseInt(req.params.skip))
+router.get('/star/lte/place/:star/:contentId/:pageNo/:numOfRows', (req, res) => {
+    let numsObj = skipCntFinder(req.params.pageNo, req.params.numOfRows)
+    Review.findByStarLteAndPlace(req.params.star, req.params.contentId, numsObj.skip, numsObj.cnt)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
@@ -77,8 +83,12 @@ router.get('/cnt/:contentId', (req, res) => {
 })
 
 router.get('/star/avg/:contentId', (req, res) => {
-    Review.findStarAvg(req.params.contentId)
-        .then(result => res.status(200).json(resHandler(result)))
+    Review.findStarAvg(parseInt(req.params.contentId))
+        .then(result => {
+            // console.log(result)
+            result = Math.round((result[0].average + Number.EPSILON) * 100) / 100
+            res.status(200).json(resHandler(result))
+        })
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
@@ -100,8 +110,9 @@ router.get('/keyword/cnt/:keyword', (req, res) => {
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.get('/keyword/list/:keyword/:skip/:cnt', (req, res) => {
-    Review.findByKeyword(req.params.keyword, parseInt(req.params.skip), parseInt(req.params.cnt))
+router.get('/keyword/list/:keyword/:pageNo/:numOfRows', (req, res) => {
+    let numsObj = skipCntFinder(req.params.pageNo, req.params.numOfRows)
+    Review.findByKeyword(req.params.keyword, numsObj.skip, numsObj.cnt)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
