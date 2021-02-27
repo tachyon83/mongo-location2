@@ -11,14 +11,14 @@ const reviewSchema = new mongoose.Schema({
     },
     contentId: {
         type: Number,
-        unique: true,
+        // unique: true,
         required: true,
         // index: true,
     },
     reviewerId: {
         type: String,
         // index: true,
-        unique: true,
+        // unique: true,
         required: true,
     },
     review: {
@@ -92,8 +92,18 @@ reviewSchema.statics.countReviews = function (contentId) {
     return this.find({ contentId }).countDocuments()
 }
 reviewSchema.statics.findStarAvg = function (contentId) {
-    return this.find({ contentId }).aggregate([
-        { $group: { average: { $avg: 'star' } } }
+    return this.aggregate([
+        { $match: { contentId, } },
+        // { $group: { average: { $avg: 'star' }, } }
+        {
+            $redact: {
+                $cond: [
+                    { $avg: 'star' },
+                    "$$KEEP",
+                    "$$PRUNE"
+                ]
+            }
+        }
     ])
 }
 // need strlen

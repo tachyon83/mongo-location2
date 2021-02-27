@@ -21,9 +21,12 @@ const wordSchema = new mongoose.Schema({
 })
 
 wordSchema.statics.upsert = function (word) {
+    console.log(`[wordSchema]: Upserting ${word}...`)
+    console.log()
     return this.findOneAndUpdate({ word }, {
         $inc: { cnt: 1 }
     }, {
+        upsert: true,
         useFindAndModify: false,
         new: true,
     })
@@ -35,6 +38,8 @@ wordSchema.statics.findByWord = function (word) {
     return this.findOne({ word })
 }
 wordSchema.statics.decreaseCnt = function (word) {
+    console.log(`[wordSchema]: Decreasing(Cnt) ${word}...`)
+    console.log()
     return this.findOneAndUpdate({
         word,
         cnt: { $gt: 1 },

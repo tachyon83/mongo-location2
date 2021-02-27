@@ -5,20 +5,30 @@ const auth = require('../utils/auth')
 const resHandler = require('../utils/resHandler')
 const errHandler = require('../utils/errHandler')
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     let review = req.body.review.split(' ')
-    for (let e of review) await Word.upsert(e)
+    try {
+        for (let e of review) await Word.upsert(e)
+        req.body.reviewerId = req.session.passport.user
+    } catch (err) {
+        return res.status(500).json(errHandler(err))
+    }
     Review.add(req.body)
         .then(result => res.status(201).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.put('/', async (req, res) => {
-    let prevReview = await Review.findOneById(req.body.reviewId)
-    let review = prevReview.review.split(' ')
-    for (let e of review) await Word.decreaseCnt(e)
-    review = req.body.review.split(' ')
-    for (let e of review) await Word.upsert(e)
+router.put('/', auth, async (req, res) => {
+    try {
+        let prevReview = await Review.findOneById(req.body.reviewId)
+        let review = prevReview.review.split(' ')
+        for (let e of review) await Word.decreaseCnt(e)
+        review = req.body.review.split(' ')
+        for (let e of review) await Word.upsert(e)
+        req.body.reviewerId = req.session.passport.user
+    } catch (err) {
+        return res.status(500).json(errHandler(err))
+    }
     Review.updateById(req.body.reviewId, req.body)
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
@@ -31,31 +41,31 @@ router.delete('/', (req, res) => {
 })
 
 router.get('/all/place/:contentId/:skip', (req, res) => {
-    Review.findAllByPlace(req.params.contentId, req.params.skip)
+    Review.findAllByPlace(req.params.contentId, parseInt(req.params.skip))
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
-router.get('/all/reviewer/:skip', (req, res) => {
-    Review.findAllByReviewer(req.session.passport.user, req.params.skip)
+router.get('/all/reviewer/:reviewerId/:skip', (req, res) => {
+    Review.findAllByReviewer(req.params.reviewerId, parseInt(req.params.skip))
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
 router.get('/star/gte/:star/:skip', (req, res) => {
-    Review.findByStarGte(req.params.star, req.params.skip)
+    Review.findByStarGte(req.params.star, parseInt(req.params.skip))
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
 router.get('/star/gte/place/:star/:contentId/:skip', (req, res) => {
-    Review.findByStarGteAndPlace(req.params.star, req.params.contentId, req.params.skip)
+    Review.findByStarGteAndPlace(req.params.star, req.params.contentId, parseInt(req.params.skip))
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
 
 router.get('/star/lte/place/:star/:contentId/:skip', (req, res) => {
-    Review.findByStarLteAndPlace(req.params.star, req.params.contentId, req.params.skip)
+    Review.findByStarLteAndPlace(req.params.star, req.params.contentId, parseInt(req.params.skip))
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
@@ -91,7 +101,7 @@ router.get('/keyword/cnt/:keyword', (req, res) => {
 })
 
 router.get('/keyword/list/:keyword/:skip/:cnt', (req, res) => {
-    Review.findByKeyword(req.params.keyword, req.params.skip, req.params.cnt)
+    Review.findByKeyword(req.params.keyword, parseInt(req.params.skip), parseInt(req.params.cnt))
         .then(result => res.status(200).json(resHandler(result)))
         .catch(err => res.status(500).json(errHandler(err)))
 })
