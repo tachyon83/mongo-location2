@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
-const querySettings = require('../settings/querySettings')
-const nextIdIncrement = require('../utils/nextIdIncrement')
+// const querySettings = require('../settings/querySettings')
+// const nextIdIncrement = require('../utils/nextIdIncrement')
 
 const reviewSchema = new mongoose.Schema({
     reviewId: {
@@ -35,22 +35,30 @@ const reviewSchema = new mongoose.Schema({
 
 reviewSchema.statics.add = function (payload) {
     return new Promise(async (resolve, reject) => {
-        let flag = false
-        while (!flag) {
-            try {
-                payload.reviewId = await nextIdIncrement('review')
-            } catch (err) {
-                return reject(err)
-            }
-            try {
-                let result = await new this(payload).save()
-                flag = true
-                return resolve(result)
-            } catch (err) {
-                console.log('[Schema]: Duplicate Key...need to increment the ReviewId.')
-                // console.log(err)
-            }
+        try {
+            const temp = await this.find().sort({ reviewId: -1 }).limit(1)
+            payload.reviewId = temp[0].reviewId + 1
+            resolve(await new this(payload).save())
+        } catch (err) {
+            reject(err)
         }
+
+        // let flag = false
+        // while (!flag) {
+        //     try {
+        //         payload.reviewId = await nextIdIncrement('review')
+        //     } catch (err) {
+        //         return reject(err)
+        //     }
+        //     try {
+        //         let result = await new this(payload).save()
+        //         flag = true
+        //         return resolve(result)
+        //     } catch (err) {
+        //         console.log('[Schema]: Duplicate Key...need to increment the ReviewId.')
+        //         // console.log(err)
+        //     }
+        // }
     })
 }
 

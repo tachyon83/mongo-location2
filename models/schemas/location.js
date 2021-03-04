@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const querySettings = require('../settings/querySettings')
-const nextIdIncrement = require('../utils/nextIdIncrement')
+// const nextIdIncrement = require('../utils/nextIdIncrement')
 
 const locationSchema = new mongoose.Schema({
     contentId: {
@@ -94,28 +94,36 @@ locationSchema.index({ position: '2dsphere' })
 
 locationSchema.statics.add = function (payload) {
     return new Promise(async (resolve, reject) => {
-        let flag = false
-        while (!flag) {
-            try {
-                payload.contentId = await nextIdIncrement('content')
-            } catch (err) {
-                return reject(err)
-            }
-            try {
-                let result = await new this(payload).save()
-                flag = true
-                return resolve(result)
-            } catch (err) {
-                console.log('[Schema]: Duplicate Key...need to increment the contentId.')
-                // console.log(err)
-            }
+        try {
+            const temp = await this.find().sort({ contentId: -1 }).limit(1)
+            payload.contentId = temp[0].contentId + 1
+            resolve(await new this(payload).save())
+        } catch (err) {
+            reject(err)
         }
+
+        // let flag = false
+        // while (!flag) {
+        //     try {
+        //         payload.contentId = await nextIdIncrement('content')
+        //     } catch (err) {
+        //         return reject(err)
+        //     }
+        //     try {
+        //         let result = await new this(payload).save()
+        //         flag = true
+        //         return resolve(result)
+        //     } catch (err) {
+        //         console.log('[Schema]: Duplicate Key...need to increment the contentId.')
+        //         // console.log(err)
+        //     }
+        // }
     })
 }
 
-locationSchema.statics.findAll = function () {
-    return this.find({}).limit(querySettings.limitPerQuery)
-}
+// locationSchema.statics.findAll = function () {
+//     return this.find({}).limit(querySettings.limitPerQuery)
+// }
 locationSchema.statics.findOneByName = function (facltNm) {
     return this.findOne({ facltNm })
 }

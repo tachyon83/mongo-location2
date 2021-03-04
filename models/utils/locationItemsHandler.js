@@ -40,7 +40,7 @@ module.exports = (req, body) => {
         } else {
             converted.response.body.items.item = []
         }
-        console.log(converted.response.body.items.item)
+        // console.log(converted.response.body.items.item)
 
         let pageNo = parseInt(req.params.pageNo)
         let numOfRows = parseInt(req.params.numOfRows)
@@ -63,7 +63,9 @@ module.exports = (req, body) => {
             }
 
             try {
-                let listFromLocalDb = await Location.findByKeyword(req.params.keyword, skip, diff)
+                let listFromLocalDb
+                if (!req.params.keyword) listFromLocalDb = await Location.findCircle(req.params.mapX, req.params.mapY, req.params.radius, skip, diff)
+                else listFromLocalDb = await Location.findByKeyword(req.params.keyword, skip, diff)
                 converted.response.body.items.item = converted.response.body.items.item.concat(listFromLocalDb)
             } catch (err) {
                 return reject(err)

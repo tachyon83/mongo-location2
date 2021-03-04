@@ -9,30 +9,31 @@ const skipCntFinder = require('../utils/skipCntFinder')
 router.post('/', auth, async (req, res) => {
     let review = req.body.review.split(' ')
     try {
-        for (let e of review) await Word.upsert(e)
         req.body.reviewerId = req.session.passport.user
+        let result = await Review.add(req.body)
+        for (let e of review) await Word.upsert(e)
+        res.status(201).json(resHandler(result))
     } catch (err) {
         return res.status(500).json(errHandler(err))
     }
-    Review.add(req.body)
-        .then(result => res.status(201).json(resHandler(result)))
-        .catch(err => res.status(500).json(errHandler(err)))
 })
 
 router.put('/', auth, async (req, res) => {
     try {
         let prevReview = await Review.findOneById(req.body.reviewId)
+
+        req.body.reviewerId = req.session.passport.user
+        let result = await Review.updateById(req.body.reviewId, req.body)
+
         let review = prevReview.review.split(' ')
         for (let e of review) await Word.decreaseCnt(e)
         review = req.body.review.split(' ')
         for (let e of review) await Word.upsert(e)
-        req.body.reviewerId = req.session.passport.user
+
+        res.status(200).json(resHandler(result))
     } catch (err) {
         return res.status(500).json(errHandler(err))
     }
-    Review.updateById(req.body.reviewId, req.body)
-        .then(result => res.status(200).json(resHandler(result)))
-        .catch(err => res.status(500).json(errHandler(err)))
 })
 
 router.delete('/', (req, res) => {
