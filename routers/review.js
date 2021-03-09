@@ -8,6 +8,7 @@ const skipCntFinder = require('../utils/skipCntFinder')
 
 router.post('/', auth, async (req, res) => {
     let review = req.body.review.split(' ')
+    review = Array.from(new Set(review))
     try {
         req.body.reviewerId = req.session.passport.user
         let result = await Review.add(req.body)
@@ -26,8 +27,10 @@ router.put('/', auth, async (req, res) => {
         let result = await Review.updateById(req.body.reviewId, req.body)
 
         let review = prevReview.review.split(' ')
+        review = Array.from(new Set(review))
         for (let e of review) await Word.decreaseCnt(e)
         review = req.body.review.split(' ')
+        review = Array.from(new Set(review))
         for (let e of review) await Word.upsert(e)
 
         res.status(200).json(resHandler(result))
